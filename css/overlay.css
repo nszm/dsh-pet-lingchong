@@ -1,0 +1,1030 @@
+/* ============================================================================
+ * 灵宠桌宠壳 · ljp-*（本插件自己的元素）
+ * ----------------------------------------------------------------------------
+ * 材质契约（主项目 docs/DSH插件-兼容层方案.md §6）：桌面窗是真透明 WebView，
+ * backdrop-filter 采样不到真实桌面 —— 卡根保持全透明让灵宠「浮」着，一切
+ * 需要读性的面（HUD / 面板）自画高不透明底，亮暗两套都由 pet.css 令牌给。
+ * ========================================================================== */
+
+/* ---- 悬浮卡（.dsh-slot--overlay / 桌面窗的直接子元素） ---- */
+.ljp-card {
+  position: absolute;
+  /* 鲸鱼的口径：压过普通挂件（容器基线 2147480000），低于整帧开场层（…3000） */
+  z-index: 2147481000;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  color: var(--color-pet-charcoal);
+  font-family: var(--font-pet-mono);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ---- 灵宠本体 ---- */
+.ljp-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  touch-action: none;
+  cursor: grab;
+}
+.ljp-stage:active {
+  cursor: grabbing;
+}
+
+.ljp-pet-btn {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  cursor: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ljp-breath {
+  width: 100%;
+  height: 100%;
+}
+
+.ljp-petbox {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  /* PetFace 的头顶表情用 cqw 定位，容器查询基准在这里 */
+  container-type: inline-size;
+}
+
+.ljp-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  z-index: 10;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  filter: drop-shadow(0 6px 6px rgba(52, 24, 0, 0.2));
+}
+
+.ljp-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+}
+.ljp-loading > span {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-pet-charcoal);
+  background: var(--color-pet-surface);
+  border: 1px solid var(--color-pet-line);
+  border-radius: 999px;
+  padding: 4px 12px;
+}
+
+/* ---- 收纳钮：悬停显形 ---- */
+.ljp-close {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  z-index: 30;
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid var(--color-pet-line);
+  background: var(--color-pet-surface);
+  color: var(--color-pet-charcoal);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.ljp-card:hover .ljp-close,
+.ljp-close:focus-visible {
+  opacity: 0.85;
+}
+
+/* ---- 迷你 HUD（主窗浮层里有；桌面单插件窗里由宿主抓手管挪动，藏掉） ---- */
+.ljp-hud {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 2px;
+  padding: 6px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--color-pet-surface) 92%, transparent);
+  border: 1px solid var(--color-pet-line);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+html.dark .ljp-hud {
+  background: color-mix(in srgb, var(--color-pet-surface) 96%, transparent);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+}
+
+.ljp-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+}
+
+.ljp-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 100%;
+  padding: 2px 8px 2px 2px;
+  border-radius: 999px;
+  border: 1px solid var(--color-pet-line);
+  background: transparent;
+  color: var(--color-pet-charcoal);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+.ljp-pill:hover {
+  border-color: color-mix(in srgb, var(--color-pet-gold) 55%, transparent);
+}
+.ljp-pill.is-on {
+  background: var(--color-pet-solid);
+  border-color: var(--color-pet-solid);
+  color: var(--color-pet-on-solid);
+}
+.ljp-pill-img {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--color-pet-rim-soft);
+}
+.ljp-pill-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ljp-pill.is-on .ljp-pill-img {
+  border-color: var(--color-pet-rim);
+}
+
+.ljp-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+.ljp-stat {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--color-pet-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ljp-ico {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  border: 1px solid var(--color-pet-line);
+  background: transparent;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+}
+.ljp-ico:hover {
+  border-color: color-mix(in srgb, var(--color-pet-gold) 55%, transparent);
+}
+
+/* ---- 侧栏面板按钮（sidebar.footer.action 座位） ---- */
+.ljp-footer {
+  position: relative;
+  min-width: 0;
+}
+.ljp-footer-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 6px 9px;
+  border-radius: 10px;
+  border: 1px solid var(--color-pet-line);
+  background: color-mix(in srgb, var(--color-pet-surface) 88%, transparent);
+  color: var(--color-pet-charcoal);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+.ljp-footer-btn:hover {
+  border-color: color-mix(in srgb, var(--color-pet-gold) 55%, transparent);
+}
+.ljp-footer-ico {
+  font-size: 13px;
+  line-height: 1;
+}
+.ljp-footer-dot {
+  margin-left: auto;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-pet-faint);
+}
+.ljp-footer-dot.is-on {
+  background: var(--color-pet-accent-teal);
+}
+
+/* ---- 侧栏弹出面板：实底（材质契约），亮暗随令牌 ---- */
+.ljp-panel {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 8px);
+  z-index: 2147482000;
+  width: 238px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 11px;
+  border-radius: 14px;
+  background: var(--color-pet-surface);
+  border: 1px solid var(--color-pet-line);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.22);
+  color: var(--color-pet-charcoal);
+  font-family: var(--font-pet-mono);
+  text-align: left;
+}
+.ljp-panel-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.ljp-panel-title {
+  font-size: 12px;
+  font-weight: 800;
+}
+.ljp-panel-cap {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--color-pet-muted);
+}
+.ljp-panel-cap-inline {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-pet-muted);
+}
+.ljp-switch {
+  flex: none;
+  min-width: 42px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--color-pet-line);
+  background: var(--color-pet-track);
+  color: var(--color-pet-muted);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.4;
+  cursor: pointer;
+}
+.ljp-switch.is-on {
+  background: var(--color-pet-solid);
+  border-color: var(--color-pet-solid);
+  color: var(--color-pet-on-solid);
+}
+.ljp-switch:hover {
+  border-color: color-mix(in srgb, var(--color-pet-gold) 55%, transparent);
+  color: var(--color-pet-charcoal);
+}
+.ljp-switch.is-on:hover {
+  border-color: var(--color-pet-solid);
+  color: var(--color-pet-on-solid);
+  filter: brightness(1.15);
+}
+.ljp-switch:active {
+  transform: translateY(0.5px);
+}
+.ljp-panel-foot {
+  font-size: 11px;
+  font-weight: 700;
+}
+.ljp-panel-hint {
+  font-size: 10px;
+  line-height: 1.6;
+  color: var(--color-pet-muted);
+}
+
+/* ---- 大小调节（侧栏面板滑杆 + 卡上 Ctrl+滚轮的读数提示） ---- */
+.ljp-scale-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+.ljp-scale-range {
+  flex: 1;
+  min-width: 0;
+  height: 4px;
+  margin: 0;
+  padding: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  border-radius: 999px;
+  background: var(--color-pet-track);
+  cursor: pointer;
+}
+.ljp-scale-range::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--color-pet-solid);
+  border: 2px solid var(--color-pet-surface);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+}
+.ljp-scale-range::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-pet-solid);
+  border: 2px solid var(--color-pet-surface);
+  cursor: pointer;
+}
+.ljp-scale-val {
+  flex: none;
+  width: 34px;
+  text-align: right;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-pet-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 调大小时一闪而过的读数（不吃指针） */
+.ljp-scale-hint {
+  position: absolute;
+  left: 50%;
+  bottom: -2px;
+  z-index: 40;
+  transform: translateX(-50%);
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--color-pet-line);
+  background: var(--color-pet-surface);
+  color: var(--color-pet-charcoal);
+  font-family: var(--font-pet-mono);
+  font-size: 10px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.14);
+  animation: ljp-scale-pop 0.16s ease;
+}
+@keyframes ljp-scale-pop {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(3px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+/* ---- 桌面单插件窗（html.lj-dsh-desktop-html，见主项目 DshDesktopSurface） ---- */
+html.lj-dsh-desktop-html .ljp-hud,
+html.lj-dsh-desktop-html .ljp-close {
+  display: none;
+}
+
+/* ---- Document PiP 小窗（独立 document，样式在 copyStyles 时整份灌入） ---- */
+.ljp-pip {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  /* PiP 系统窗是实底的：自画令牌底色，亮暗随宿主 html class（copyStyles 抄的） */
+  background: var(--color-pet-bg);
+  color: var(--color-pet-charcoal);
+  font-family: var(--font-pet-mono);
+  user-select: none;
+  -webkit-user-select: none;
+}
+.ljp-pip-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.ljp-pip-title {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ljp-pip-close {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid var(--color-pet-line);
+  background: var(--color-pet-surface);
+  color: var(--color-pet-charcoal);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+}
+.ljp-pip-stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.ljp-pip-pet {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transform-origin: center center;
+  transition: transform 0.12s ease-out;
+}
+.ljp-pip-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+.ljp-pip-foot .ljp-pills {
+  flex: 1;
+  flex-wrap: nowrap;
+  justify-content: center;
+}
+.ljp-pip-foot .ljp-pill {
+  padding: 2px;
+  border-radius: 50%;
+}
+.ljp-pip-foot .ljp-pill.is-on {
+  box-shadow: 0 0 0 2px var(--color-pet-solid);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ljp-stage,
+  .ljp-pill,
+  .ljp-close,
+  .ljp-switch,
+  .ljp-footer-btn {
+    transition: none;
+  }
+}
+
+/* ---- 灵宠 · 独立设置页（模态） ---- */
+.ljp-modal-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 2147482700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(8, 10, 16, 0.55);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+.ljp-modal {
+  width: min(720px, 100%);
+  max-height: min(84vh, 780px);
+  display: flex;
+  flex-direction: column;
+  border-radius: 18px;
+  background: var(--color-pet-bg, #fcf9f8);
+  color: var(--color-pet-charcoal, #1b1c1c);
+  border: 1px solid var(--color-pet-line, rgba(23, 26, 32, 0.08));
+  box-shadow: 0 32px 90px rgba(0, 0, 0, 0.4);
+  font-family: var(--font-pet-mono, monospace);
+  overflow: hidden;
+}
+html.dark .ljp-modal-mask { background: rgba(4, 5, 8, 0.66); }
+.ljp-modal-head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--color-pet-line, rgba(23, 26, 32, 0.08));
+}
+.ljp-modal-title { font-size: 14px; font-weight: 800; letter-spacing: 0.04em; }
+.ljp-modal-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 6px 18px 18px;
+}
+.ljp-set-sec { padding: 14px 0 4px; border-bottom: 1px dashed var(--color-pet-line, rgba(23,26,32,0.08)); }
+.ljp-set-sec:last-of-type { border-bottom: none; }
+.ljp-set-sec h3 {
+  margin: 0 0 10px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: var(--color-pet-muted, #747878);
+}
+.ljp-set-pets { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.ljp-set-pet {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  width: 104px;
+  padding: 8px 6px;
+  border-radius: 12px;
+  border: 1px solid var(--color-pet-line, rgba(23,26,32,0.1));
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  cursor: pointer;
+}
+.ljp-set-pet img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; }
+.ljp-set-pet-name { font-size: 11px; font-weight: 700; }
+.ljp-set-pet-sub { font-size: 9px; color: var(--color-pet-muted, #747878); }
+.ljp-set-pet.is-on {
+  border-color: var(--color-pet-solid, #101112);
+  background: color-mix(in srgb, var(--color-pet-solid, #101112) 6%, transparent);
+}
+.ljp-set-dex {
+  display: flex;
+  gap: 14px;
+  padding: 12px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--color-pet-stone, #f5f2ef) 70%, transparent);
+}
+.ljp-set-dex-img { width: 132px; height: 132px; object-fit: contain; flex: none; }
+.ljp-set-dex-info { min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.ljp-set-dex-title { font-size: 14px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+.ljp-set-dex-badge {
+  font-size: 10px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--color-pet-gold, #d4af37);
+  color: var(--color-pet-accent-amber, #d97706);
+}
+.ljp-set-dex-quote { font-size: 12px; color: var(--color-pet-accent-rose, #e11d48); }
+.ljp-set-dex-row { font-size: 11px; color: var(--color-pet-muted, #747878); }
+.ljp-set-dex-attrs span { margin-right: 12px; font-weight: 700; }
+.ljp-set-dex-traits span {
+  display: inline-block;
+  margin: 0 6px 4px 0;
+  padding: 1px 8px;
+  font-size: 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-pet-solid, #101112) 8%, transparent);
+}
+.ljp-set-dex-story { margin: 4px 0 0; font-size: 11px; line-height: 1.7; color: var(--color-pet-graphite, #303030); }
+.ljp-set-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.ljp-set-grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ljp-set-opt {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 9px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--color-pet-line, rgba(23,26,32,0.1));
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.ljp-set-opt b { font-size: 12px; }
+.ljp-set-opt small { font-size: 10px; color: var(--color-pet-muted, #747878); line-height: 1.5; }
+.ljp-set-opt.is-on {
+  border-color: var(--color-pet-solid, #101112);
+  background: color-mix(in srgb, var(--color-pet-solid, #101112) 6%, transparent);
+}
+.ljp-set-checks { display: flex; flex-wrap: wrap; gap: 10px 18px; }
+.ljp-set-check { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; cursor: pointer; }
+.ljp-set-check input { accent-color: var(--color-pet-solid, #101112); }
+.ljp-set-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.ljp-set-chip {
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--color-pet-line, rgba(23,26,32,0.12));
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+.ljp-set-chip.is-on {
+  background: var(--color-pet-solid, #101112);
+  border-color: var(--color-pet-solid, #101112);
+  color: var(--color-pet-on-solid, #fff);
+}
+.ljp-set-goalbar {
+  position: relative;
+  margin-top: 10px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--color-pet-track, #f1f2f4);
+  overflow: hidden;
+}
+.ljp-set-goalbar-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: linear-gradient(90deg, var(--color-pet-gold, #d4af37), var(--color-pet-accent-amber, #d97706));
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+.ljp-set-goalbar span {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 10px;
+  font-weight: 700;
+}
+.ljp-set-stats { display: flex; gap: 10px; margin-bottom: 12px; }
+.ljp-set-stats > div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 6px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--color-pet-stone, #f5f2ef) 70%, transparent);
+}
+.ljp-set-stats b { font-size: 18px; }
+.ljp-set-stats span { font-size: 10px; color: var(--color-pet-muted, #747878); }
+.ljp-set-week {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 8px 4px 2px;
+}
+.ljp-set-week-day {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.ljp-set-week-bar {
+  width: 100%;
+  max-width: 34px;
+  border-radius: 6px 6px 2px 2px;
+  background: linear-gradient(180deg, var(--color-pet-gold, #d4af37), color-mix(in srgb, var(--color-pet-gold, #d4af37) 45%, transparent));
+}
+.ljp-set-week-day span { font-size: 10px; color: var(--color-pet-muted, #747878); }
+.ljp-set-foot { margin: 14px 0 0; font-size: 10px; line-height: 1.7; color: var(--color-pet-muted, #747878); }
+
+/* ---- 灵宠 · 完整界面(全屏) ---- */
+/* 全屏页 = 悬浮在遮罩上的页面层:
+   · absolute(而非 fixed)—— 以宿主(host, fixed, top=窗口控件条底缘)为包含块,
+     遮罩只盖页面区域,DSH 标题栏不再被压暗/遮挡;
+   · 24px 设计呼吸间距:页面以圆角卡片浮起,不再顶到标题栏。 */
+.ljpful-mask {
+  position: absolute;
+  inset: 0;
+  z-index: 2147482700;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  padding: 40px 24px 20px;
+  background: rgba(7, 9, 14, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.ljpful {
+  width: min(1080px, 100%);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-pet-bg, #fcf9f8);
+  color: var(--color-pet-charcoal, #1b1c1c);
+  font-family: var(--font-pet-mono, monospace);
+  overflow: hidden;
+}
+@media (min-width: 700px) { .ljpful { border-left: 1px solid rgba(255,255,255,.08); } }
+.ljpful-head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--color-pet-line, rgba(23,26,32,.08));
+}
+.ljpful-title { font-size: 15px; font-weight: 800; letter-spacing: .05em; }
+.ljpful-head-sub { font-size: 11px; color: var(--color-pet-muted, #747878); margin-right: auto; }
+.ljpful-body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(300px, 42%) minmax(0, 1fr);
+}
+@media (max-width: 760px) { .ljpful-body { grid-template-columns: 1fr; overflow-y: auto; } }
+.ljpful-left {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px;
+  border-right: 1px solid var(--color-pet-line, rgba(23,26,32,.08));
+  background:
+    radial-gradient(60% 40% at 20% 10%, rgba(251,191,36,.10), transparent 70%),
+    radial-gradient(50% 40% at 85% 80%, rgba(45,212,191,.10), transparent 70%);
+}
+@media (max-width: 760px) { .ljpful-left { border-right: none; border-bottom: 1px solid var(--color-pet-line, rgba(23,26,32,.08)); } }
+.ljpful-stage { display: flex; flex-direction: column; gap: 10px; flex: 1; min-height: 0; }
+.ljpful-stage-top { display: flex; justify-content: space-between; gap: 8px; }
+.ljpful-pill-tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700;
+  background: color-mix(in srgb, var(--color-pet-surface, #fff) 80%, transparent);
+  border: 1px solid var(--color-pet-line, rgba(23,26,32,.08));
+}
+.ljpful-stage-pet { position: relative; flex: 1; min-height: 220px; display: flex; align-items: center; justify-content: center; }
+.ljpful-tap {
+  width: min(320px, 80%);
+  aspect-ratio: 1;
+  padding: 0; border: 0; background: transparent; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.ljpful-breath { width: 100%; height: 100%; }
+.ljpful-petbox { position: relative; width: 100%; height: 100%; container-type: inline-size; }
+.ljpful-stage-combo {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  font-size: 11px; color: var(--color-pet-muted, #747878); letter-spacing: .1em;
+}
+.ljpful-combo-bar {
+  width: 120px; height: 5px; border-radius: 999px; overflow: hidden;
+  background: var(--color-pet-track, #f1f2f4);
+}
+.ljpful-combo-bar i {
+  display: block; height: 100%;
+  background: linear-gradient(90deg, var(--color-pet-gold, #d4af37), var(--color-pet-accent-amber, #d97706));
+  transition: width .25s ease;
+}
+.ljpful-modes { display: flex; gap: 8px; justify-content: center; }
+.ljpful-mode {
+  flex: 1; max-width: 180px; padding: 9px 14px; border-radius: 999px;
+  border: 1px solid var(--color-pet-line, rgba(23,26,32,.12));
+  background: transparent; color: inherit; font-family: inherit;
+  font-size: 12px; font-weight: 700; cursor: pointer;
+}
+.ljpful-mode.is-on {
+  background: var(--color-pet-solid, #101112);
+  border-color: var(--color-pet-solid, #101112);
+  color: var(--color-pet-on-solid, #fff);
+}
+.ljpful-right { min-height: 0; overflow-y: auto; padding: 4px 20px 20px; }
+.ljpful-log { margin-top: 10px; display: flex; flex-direction: column; gap: 4px; }
+.ljpful-log-item {
+  display: flex; gap: 10px; font-size: 11px;
+  color: var(--color-pet-muted, #747878);
+  padding: 5px 10px; border-radius: 8px;
+  background: color-mix(in srgb, var(--color-pet-stone, #f5f2ef) 60%, transparent);
+}
+.ljpful-log-item span:first-child { font-weight: 700; }
+
+
+/* ---- 灵宠 · 原版 PetStudio 全屏容器 ---- */
+.ljpful-petstudio {
+  position: relative;
+  width: min(1200px, 100%);
+  height: 100%;
+  overflow: hidden auto;
+  border-radius: 20px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--color-pet-faint) 70%, transparent) transparent;
+}
+/* 细滚条:默认滚动条又宽又黑,会压住右上角关闭/设置钮(2026-10-26 用户口径) */
+.ljpful-petstudio::-webkit-scrollbar {
+  width: 8px;
+}
+.ljpful-petstudio::-webkit-scrollbar-track {
+  background: transparent;
+}
+.ljpful-petstudio::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--color-pet-faint) 62%, transparent);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+.ljpful-petstudio::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--color-pet-muted) 70%, transparent);
+  background-clip: padding-box;
+}
+.ljpful-close {
+  position: fixed;
+  top: 18px;
+  right: 24px;
+  z-index: 2147482800;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.25);
+  background: rgba(15, 18, 26, .55);
+  color: #fff;
+  font-size: 15px;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+}
+.ljpful-close:hover { background: rgba(15, 18, 26, .8); }
+
+/* ==========================================================================
+ * 贴合 DSH:正文用与宿主同源的系统字体栈;标题/数字仍用宠物展示字体。
+ *   (DSH body font = -apple-system/BlinkMacSystemFont/Segoe UI/PingFang SC…)
+ * ========================================================================== */
+:host {
+  --font-pet-ui: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+    'HarmonyOS Sans SC', 'Microsoft YaHei', system-ui, sans-serif;
+}
+.ljp-panel {
+  font-family: var(--font-pet-ui);
+}
+.ljp-footer-btn {
+  font-family: var(--font-pet-ui);
+}
+
+/* ---- shadow 内无 preflight:按钮/图片/标题的 UA 默认样式(灰底、边框)
+   会漏出来 —— 主项目本体有 preflight 所以没事。用零特异性 :where 重置,
+   任何工具类都能覆盖它,已写死的组件类不受影响。 ---- */
+:where(.ljpful-petstudio) :where(button) {
+  border: 0 solid transparent;
+  background-color: transparent;
+  background-image: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+:where(.ljpful-petstudio) :where(button:focus-visible) {
+  outline: 2px solid var(--color-pet-gold);
+  outline-offset: 2px;
+}
+:where(.ljpful-petstudio) :where(img, svg) {
+  display: block;
+  vertical-align: middle;
+}
+:where(.ljpful-petstudio) :where(h1, h2, h3, h4, p) {
+  margin: 0;
+}
+
+/* ---- 舞台地面阴影:把立绘压在地面上(3D 落地感,与呼吸同节奏微缩) ---- */
+.ljp-ground-shadow {
+  background: radial-gradient(
+    closest-side,
+    rgba(0, 0, 0, 0.26),
+    rgba(0, 0, 0, 0.12) 55%,
+    transparent 78%
+  );
+  filter: blur(6px);
+  animation: ljp-shadow-breathe 3.2s ease-in-out infinite;
+}
+@keyframes ljp-shadow-breathe {
+  0%,
+  100% {
+    transform: translateX(-50%) scaleX(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: translateX(-50%) scaleX(0.93);
+    opacity: 0.6;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ljp-ground-shadow {
+    animation: none;
+  }
+}
+
+/* ---- 舞台卡 3D 倾斜:指针驱动的透视旋转(变量由 PetStage 写入) ---- */
+.ljp-tilt {
+  transform: perspective(1200px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.2s ease-out;
+}
+
+/* ---- 性格气泡(大肥鱼同款交互,主项目亮色瓷面;只说话不挡手) ---- */
+.ljp-bubble {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% - 10px);
+  transform: translateX(-50%);
+  z-index: 40;
+  max-width: 240px;
+  padding: 8px 11px;
+  border-radius: 12px;
+  border: 1px solid var(--color-pet-line);
+  background: var(--color-pet-surface);
+  color: var(--color-pet-charcoal);
+  font-family: var(--font-pet-ui);
+  font-size: 12px;
+  line-height: 1.55;
+  text-align: left;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  animation: ljp-bubble-in 0.22s ease;
+}
+.ljp-bubble::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -5px;
+  width: 9px;
+  height: 9px;
+  transform: translateX(-50%) rotate(45deg);
+  background: var(--color-pet-surface);
+  border-right: 1px solid var(--color-pet-line);
+  border-bottom: 1px solid var(--color-pet-line);
+}
+@keyframes ljp-bubble-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(6px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ljp-bubble {
+    animation: none;
+  }
+}
+
+/* ---- 对话陪伴状态点(回复说完亮 2.5s) ---- */
+.ljp-chat-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--color-pet-faint);
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+.ljp-chat-dot.is-on {
+  background: var(--color-pet-jade);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-pet-jade) 22%, transparent);
+}
+.ljp-chat-chip {
+  flex: none;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--color-pet-jade) 35%, transparent);
+  background: color-mix(in srgb, var(--color-pet-tint-teal) 72%, transparent);
+  color: var(--color-pet-accent-teal);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.ljp-chat-chip.is-off {
+  border-color: var(--color-pet-line);
+  background: var(--color-pet-stone-subtle);
+  color: var(--color-pet-muted);
+}
+.ljp-chat-chip-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}

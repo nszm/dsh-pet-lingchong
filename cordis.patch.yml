@@ -1,0 +1,6 @@
+# Bundle patch for dsh-pet-lingchong — 把插件插进 profile 加载树（照 dsh-pet-indesktop 的形态）。
+# 装包 ≠ 生效：没有这行 insert，包只是 node_modules 里的惰性依赖，
+# web 壳不会把 client.js 注入页面。id/name 都用包名（兄弟插件的既定约定）。
+- insert:
+    - id: dsh-pet-lingchong
+      name: dsh-pet-lingchong

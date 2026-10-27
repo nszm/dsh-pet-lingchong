@@ -1,0 +1,505 @@
+/* ============================================================================
+ * 灵宠令牌 · 由主项目 src/pets/pets.css 自动转换而来（node scripts/sync-css.mjs）
+ * ----------------------------------------------------------------------------
+ * 唯一差异：`@theme {` → `:root {`。原文件是 Tailwind v4 的主题声明，
+ * 编译期才展开；本插件不跑 Tailwind，必须把变量落成浏览器认识的 :root。
+ * 其余内容（暗色覆盖 / 动画 / liquid-glass / reduced-motion）逐字保留。
+ * 请勿手改本文件 —— 改主项目的 pets.css，然后重跑本脚本。
+ * ========================================================================== */
+/* ============================================================================
+ * 灵宠 —— 自包含视觉层（亮 / 暗双主题）
+ * ----------------------------------------------------------------------------
+ * 令牌分两层：
+ *   ① 基础色板（bg / stone / charcoal / muted / faint …）—— 原稿的暖青瓷色，
+ *      这一层只补一个 html.dark 取值，色相仍是同一套；
+ *   ② 语义令牌（surface / line / track / solid / tint / accent / rim）——
+ *      组件只认这一层，亮暗差异全部收在下面 html.dark 的覆盖块里。
+ *
+ * 为什么**不用** Tailwind 的 dark: 变体：
+ *   主程序没有注册 @custom-variant，v4 默认的 dark: 跟的是 prefers-color-scheme
+ *   （系统偏好），而皮肤开关写的是 html.dark class。两者不同步 —— 浅色系统里切到
+ *   暗夜时 dark: 类根本不会生效。所以本页一律走「令牌 + html.dark 覆盖」，零 dark:。
+ *
+ * 字体：--font-display / --font-cinzel / --font-pet-mono 复刻原稿；
+ *       sans 复用主程序本地 Plus Jakarta Sans，不重复引入。
+ * 未迁移（避免污染主程序全局）：body 背景 / overscroll、全局隐藏滚动条 ——
+ *       页面背景由 PetStudio 根节点自带（bg-pet-bg / text-pet-graphite）。
+ * 注意：原 v3 的 borderRadius 3xl/4xl 覆盖不迁移（主程序别处在用 rounded-3xl），
+ *       组件里逐条换成等价的 rounded-[1.75rem] / rounded-[2.25rem]。
+ * ========================================================================== */
+/* 字体 @import 已上移到 src/index.css 顶部（postcss 要求 @import 连续且前置） */
+
+:root {
+  /* ---------- ① 基础色板（亮色） ---------- */
+  --color-pet-bg: #fcf9f8;
+  --color-pet-pure: #ffffff;
+  --color-pet-stone: #f5f2ef;
+  --color-pet-stone-subtle: #faf8f6;
+  --color-pet-charcoal: #1b1c1c;
+  --color-pet-graphite: #303030;
+  --color-pet-muted: #747878;
+  --color-pet-faint: #c4c7c7;
+  --color-pet-gold: #d4af37;
+  --color-pet-rose: #ff4b72;
+  --color-pet-peach: #ff8a80;
+  --color-pet-jade: #0f9d8d;
+
+  /* ---------- ② 语义令牌（亮色） ---------- */
+  /* 卡片面 / 分隔线 */
+  --color-pet-surface: #ffffff;
+  --color-pet-line: rgba(23, 26, 32, 0.08);
+  --color-pet-line-soft: rgba(23, 26, 32, 0.05);
+  /* 进度轨 */
+  --color-pet-track: #f1f2f4;
+  /* 实心主按钮（黑底白字；暗色反过来，白底黑字） */
+  --color-pet-solid: #101112;
+  --color-pet-on-solid: #ffffff;
+  --color-pet-on-solid-accent: #fcd34d;
+  /* 玻璃 / 缩略图描边（永远是"白色高光"，只是暗色下要收敛） */
+  --color-pet-rim: rgba(255, 255, 255, 0.7);
+  --color-pet-rim-soft: rgba(255, 255, 255, 0.32);
+  /* 色块底（图标圆底 / 护符卡底） */
+  --color-pet-tint-rose: #fff1f2;
+  --color-pet-tint-rose-line: #ffe4e6;
+  --color-pet-tint-amber: #fffbeb;
+  --color-pet-tint-amber-line: #fef3c7;
+  --color-pet-tint-teal: #f0fdfa;
+  --color-pet-tint-teal-line: #ccfbf1;
+  /* 彩色文字：亮色偏深压得住白底，暗色提亮才不发灰 */
+  --color-pet-accent-rose: #e11d48;
+  --color-pet-accent-amber: #d97706;
+  --color-pet-accent-teal: #0d9488;
+  --color-pet-accent-emerald: #047857;
+
+  /* ---------- 字体 ---------- */
+  --font-display: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  --font-cinzel: 'Cinzel', 'Noto Serif SC', serif;
+  --font-pet-mono: 'Space Grotesk', 'JetBrains Mono', monospace;
+}
+
+/* ============================================================================
+ * 暗色取值（html.dark 由 App 的 themeMode 同步）
+ * ----------------------------------------------------------------------------
+ * 底色取主程序暗夜的同一族（冷黑 + 一丝蓝），表面比底色亮一档 —— 卡片靠
+ * 「面比底亮」分层，不靠投影（暗色里黑影本来也看不见）。
+ * ========================================================================== */
+html.dark {
+  --color-pet-bg: #0b0d12;
+  --color-pet-pure: #ffffff;
+  --color-pet-stone: #191e28;
+  --color-pet-stone-subtle: #11151d;
+  --color-pet-charcoal: #f2f5f9;
+  --color-pet-graphite: #dde3ed;
+  --color-pet-muted: #98a1ae;
+  --color-pet-faint: #5a6270;
+
+  --color-pet-surface: #141822;
+  --color-pet-line: rgba(255, 255, 255, 0.1);
+  --color-pet-line-soft: rgba(255, 255, 255, 0.06);
+  --color-pet-track: #212734;
+  --color-pet-solid: #eef2f8;
+  --color-pet-on-solid: #0b0d12;
+  --color-pet-on-solid-accent: #b45309;
+  --color-pet-rim: rgba(255, 255, 255, 0.16);
+  --color-pet-rim-soft: rgba(255, 255, 255, 0.08);
+
+  --color-pet-tint-rose: rgba(244, 63, 94, 0.16);
+  --color-pet-tint-rose-line: rgba(244, 63, 94, 0.3);
+  --color-pet-tint-amber: rgba(245, 158, 11, 0.16);
+  --color-pet-tint-amber-line: rgba(245, 158, 11, 0.28);
+  --color-pet-tint-teal: rgba(15, 157, 141, 0.18);
+  --color-pet-tint-teal-line: rgba(15, 157, 141, 0.32);
+
+  --color-pet-accent-rose: #fb7185;
+  --color-pet-accent-amber: #fbbf24;
+  --color-pet-accent-teal: #2dd4bf;
+  --color-pet-accent-emerald: #34d399;
+}
+
+/* 暗色下的环境色场：白天的水彩渐层到夜里会亮得刺眼，压暗到"夜雾里的余晖"。
+   分两级 —— 页面大色场（pet-aurora-page）几乎只剩一点色相，舞台内的小色团
+   要留得亮一些：玻璃后面得有颜色可以折射，否则整块舞台会灰成一块塑料板。 */
+html.dark .pet-aurora {
+  opacity: 0.62;
+  filter: saturate(0.9) brightness(0.88);
+}
+html.dark .pet-aurora-page {
+  opacity: 0.32;
+  filter: saturate(0.7) brightness(0.7);
+}
+
+/* 图鉴主视觉的底色层：单独压暗，不影响叠在上面的文字与灵宠本体 */
+html.dark .pet-glow {
+  filter: brightness(0.55) saturate(1.3);
+}
+html.dark .pet-glow-orb {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+
+/* Floating blessing chip rising */
+@keyframes badgeRise {
+  0% {
+    opacity: 0;
+    transform: translateY(14px) scale(0.85);
+  }
+  22% {
+    opacity: 1;
+    transform: translateY(-20px) scale(1.06);
+  }
+  75% {
+    opacity: 1;
+    transform: translateY(-60px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-100px) scale(1.05);
+  }
+}
+.clay-badge-rise {
+  animation: badgeRise 0.95s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Sparkle particle burst */
+@keyframes sparkleBurst {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(0.7);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--tx), var(--ty)) scale(1.4);
+  }
+}
+.sparkle-particle {
+  animation: sparkleBurst 0.7s ease-out forwards;
+}
+
+/* Pet gentle breathing — centered, no drift */
+@keyframes petBreathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.015, 0.985);
+  }
+}
+.pet-breathing {
+  animation: petBreathe 4.5s ease-in-out infinite;
+}
+
+/* Pet tap squish bounce */
+.muyu-pet-tap {
+  animation: muyuPetBounce 0.38s cubic-bezier(0.175, 0.885, 0.32, 1.4);
+}
+@keyframes muyuPetBounce {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.08, 0.92) translateY(6px);
+  }
+  70% {
+    transform: scale(0.96, 1.05) translateY(-3px);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Floating reaction bubble */
+@keyframes emojiPopFly {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.65) rotate(var(--rot-start, -6deg));
+  }
+  25% {
+    opacity: 1;
+    transform: translateY(-24px) scale(1.15) rotate(var(--rot-mid, 3deg));
+  }
+  75% {
+    opacity: 0.95;
+    transform: translateY(-56px) scale(1) rotate(var(--rot-mid, 0deg));
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-92px) scale(0.9) rotate(var(--rot-end, -3deg));
+  }
+}
+.emoji-pop-bubble {
+  animation: emojiPopFly 0.92s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Golden aura pulse */
+@keyframes petAuraPulse {
+  0% {
+    opacity: 0.3;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.15);
+  }
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+}
+.pet-aura-pulse {
+  animation: petAuraPulse 0.9s ease-out forwards;
+}
+
+/* 瞪圆眼：倍率由组件给，这里只管过渡（放大带一点回弹） */
+.pet-eye-pop {
+  transform-box: view-box;
+  transition: transform 220ms cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+
+/* 星星眼：缩放 + 旋转进出 */
+.pet-star-eye {
+  transform-box: view-box;
+  transition:
+    transform 320ms cubic-bezier(0.3, 1.45, 0.5, 1),
+    opacity 180ms ease;
+}
+
+/* 头顶表情符号：冒出来、飘一下、散掉 */
+@keyframes petEmote {
+  0% { opacity: 0; transform: translate(-50%, 10px) scale(0.4); }
+  18% { opacity: 1; transform: translate(-50%, -14px) scale(1.18); }
+  32% { transform: translate(-50%, -20px) scale(1); }
+  80% { opacity: 1; transform: translate(-50%, -46px) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -62px) scale(0.85); }
+}
+.pet-emote {
+  animation: petEmote 1.5s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.12));
+}
+
+/* 打盹的 zzz：缓慢上浮循环 */
+@keyframes petZzz {
+  0% { opacity: 0; transform: translate(0, 6px) scale(0.8); }
+  30% { opacity: 1; }
+  100% { opacity: 0; transform: translate(14px, -26px) scale(1.1); }
+}
+.pet-zzz {
+  animation: petZzz 2.4s ease-out infinite;
+}
+
+/* ============================================================
+ * Apple Liquid Glass (iOS 26 style) — refraction + reflection
+ * Uses SVG feTurbulence + feDisplacementMap via backdrop-filter.
+ * ============================================================ */
+
+.liquid-glass {
+  -webkit-backdrop-filter: url(#liquid-glass-refract) blur(2px) saturate(180%) brightness(1.08);
+  backdrop-filter: url(#liquid-glass-refract) blur(2px) saturate(180%) brightness(1.08);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.18) 0%,
+    rgba(255, 255, 255, 0.06) 45%,
+    rgba(255, 255, 255, 0.12) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow:
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.65),
+    inset 0 -1px 1px 0 rgba(255, 255, 255, 0.25),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 8px 32px rgba(31, 38, 135, 0.1),
+    0 2px 8px rgba(31, 38, 135, 0.06);
+}
+
+/* Stronger refraction variant for the pet panel (bigger radius = more warp) */
+.liquid-glass-strong {
+  -webkit-backdrop-filter: url(#liquid-glass-refract-lg) blur(3px) saturate(200%) brightness(1.12);
+  backdrop-filter: url(#liquid-glass-refract-lg) blur(3px) saturate(200%) brightness(1.12);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.22) 0%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.16) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow:
+    inset 0 1.5px 1.5px 0 rgba(255, 255, 255, 0.75),
+    inset 0 -1.5px 1.5px 0 rgba(255, 255, 255, 0.3),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 12px 40px rgba(31, 38, 135, 0.14),
+    0 4px 12px rgba(31, 38, 135, 0.08);
+}
+
+/* Specular highlight sheen that sweeps across the glass surface */
+.liquid-glass-sheen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    130deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.35) 48%,
+    rgba(255, 255, 255, 0.08) 52%,
+    transparent 70%
+  );
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+/* Edge refraction ring — simulates light bending at the curved rim */
+.liquid-glass-edge::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow:
+    inset 0 0 0 1.5px rgba(255, 255, 255, 0.18),
+    inset 0 0 12px 2px rgba(255, 255, 255, 0.12);
+  pointer-events: none;
+}
+
+@keyframes sheenSweep {
+  0% {
+    transform: translateX(-120%) rotate(8deg);
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(120%) rotate(8deg);
+    opacity: 0;
+  }
+}
+.liquid-glass-sweep::before {
+  animation: sheenSweep 6s ease-in-out infinite;
+}
+
+/* Fallback for browsers without SVG backdrop-filter support */
+@supports not ((backdrop-filter: url(#x)) or (-webkit-backdrop-filter: url(#x))) {
+  .liquid-glass,
+  .liquid-glass-strong {
+    -webkit-backdrop-filter: blur(16px) saturate(180%) brightness(1.08);
+    backdrop-filter: blur(16px) saturate(180%) brightness(1.08);
+  }
+}
+
+/* ---- 液态玻璃 · 暗色 ----
+ * 亮色玻璃能吃"提亮 8% + 白边 55%"，暗色照搬会变成一块发光的塑料。
+ * 暗色口径：**往暗里压**（brightness 0.92），白边收到 14%，投影换成黑影 ——
+ * 仍然是"雾面玻璃"，只是从晨光下的窗变成夜里的一层薄霜。 */
+html.dark .liquid-glass {
+  -webkit-backdrop-filter: url(#liquid-glass-refract) blur(2px) saturate(150%) brightness(0.92);
+  backdrop-filter: url(#liquid-glass-refract) blur(2px) saturate(150%) brightness(0.92);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.02) 45%,
+    rgba(255, 255, 255, 0.06) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow:
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -1px 1px 0 rgba(255, 255, 255, 0.05),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 12px 40px rgba(0, 0, 0, 0.55),
+    0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+html.dark .liquid-glass-strong {
+  -webkit-backdrop-filter: url(#liquid-glass-refract-lg) blur(3px) saturate(160%) brightness(0.94);
+  backdrop-filter: url(#liquid-glass-refract-lg) blur(3px) saturate(160%) brightness(0.94);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.12) 0%,
+    rgba(255, 255, 255, 0.03) 50%,
+    rgba(255, 255, 255, 0.08) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow:
+    inset 0 1.5px 1.5px 0 rgba(255, 255, 255, 0.16),
+    inset 0 -1.5px 1.5px 0 rgba(255, 255, 255, 0.06),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+    0 16px 48px rgba(0, 0, 0, 0.6),
+    0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* 扫光与边缘折射：暗色下 white 也是"光"，但只该剩一道淡淡的高光 */
+html.dark .liquid-glass-sheen::before {
+  background: linear-gradient(
+    130deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.16) 48%,
+    rgba(255, 255, 255, 0.05) 52%,
+    transparent 70%
+  );
+}
+
+html.dark .liquid-glass-edge::after {
+  box-shadow:
+    inset 0 0 0 1.5px rgba(255, 255, 255, 0.1),
+    inset 0 0 12px 2px rgba(255, 255, 255, 0.06);
+}
+
+@supports not ((backdrop-filter: url(#x)) or (-webkit-backdrop-filter: url(#x))) {
+  html.dark .liquid-glass,
+  html.dark .liquid-glass-strong {
+    -webkit-backdrop-filter: blur(16px) saturate(150%) brightness(0.92);
+    backdrop-filter: blur(16px) saturate(150%) brightness(0.92);
+  }
+}
+
+/* ============================================================
+ * 设置抽屉 / 遮罩入场
+ * ============================================================ */
+@keyframes petDrawerIn {
+  from {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.pet-drawer-in {
+  animation: petDrawerIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes petFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.pet-fade-in {
+  animation: petFadeIn 0.2s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pet-drawer-in,
+  .pet-fade-in,
+  .pet-breathing,
+  .liquid-glass-sweep::before {
+    animation: none;
+  }
+  .pet-star-eye,
+  .pet-eye-pop {
+    transition: none;
+  }
+}
+
+
+/* 导入灵宠：标眼睛画布的透明棋盘底（看得出哪里被抠掉了） */
+.pet-import-checker {
+  background-color: var(--color-pet-surface);
+  background-image:
+    linear-gradient(45deg, var(--color-pet-stone) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--color-pet-stone) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--color-pet-stone) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--color-pet-stone) 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+}
